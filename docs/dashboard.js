@@ -232,3 +232,174 @@ function updateAnalysis() {
     // Update comparison table
     updateComparisonTable(baselineCosts, adminSavings, errorSavings, clinicalSavings, aiImpact);
 }
+
+function updateMetrics(totalSavings, implementationCost, adminEfficiency, aiImpact) {
+    // Annual savings
+    document.getElementById('annual-savings').textContent = `¥${totalSavings.toFixed(1)}T`;
+    document.getElementById('savings-change').textContent = `+${(totalSavings/45*100).toFixed(0)}% vs baseline`;
+
+    // ROI calculation
+    const annualNetSavings = totalSavings - (implementationCost * 0.1); // 10% annual maintenance
+    const fiveYearRoi = ((annualNetSavings * 5 - implementationCost) / implementationCost * 100);
+    const paybackPeriod = implementationCost / annualNetSavings;
+
+    document.getElementById('roi-value').textContent = `${fiveYearRoi.toFixed(0)}%`;
+    document.getElementById('roi-change').textContent = `Payback: ${paybackPeriod.toFixed(1)} years`;
+
+    // Administrative reduction
+    document.getElementById('admin-reduction').textContent = `-${adminEfficiency}%`;
+
+    // Patient throughput
+    const throughputIncrease = Math.round(22 * aiImpact);
+    document.getElementById('patient-increase').textContent = `+${throughputIncrease}%`;
+    document.getElementById('throughput-change').textContent = 'Capacity improvement';
+}
+
+function updateCharts(baselineCosts, adminSavings, errorSavings, clinicalSavings, newTotal, implementationCost) {
+    // Update cost comparison chart
+    costChart.data.datasets[1].data = [
+        baselineCosts.administrative - adminSavings,
+        baselineCosts.clinical - clinicalSavings,
+        baselineCosts.errors - errorSavings,
+        newTotal
+    ];
+    costChart.update();
+
+    // Update ROI chart with new implementation cost
+    const cumulativeSavings = [];
+    const annualSavings = adminSavings + errorSavings + clinicalSavings;
+    const maintenanceCost = implementationCost * 0.1;
+    
+    for (let year = 1; year <= 5; year++) {
+        const cumulative = (annualSavings - maintenanceCost) * year - implementationCost;
+        cumulativeSavings.push(cumulative);
+    }
+    
+    roiChart.data.datasets[0].data = cumulativeSavings;
+    roiChart.update();
+
+    // Update productivity chart based on parameters
+    const aiAdoption = parseInt(document.getElementById('ai-adoption').value);
+    const adminEfficiency = parseInt(document.getElementById('admin-efficiency').value);
+    const errorReduction = parseInt(document.getElementById('error-reduction').value);
+    
+    productivityChart.data.datasets[1].data = [
+        100 + (adminEfficiency * aiAdoption / 100),
+        100 + (errorReduction * aiAdoption / 100),
+        100 + (300 * aiAdoption / 100), // Processing speed
+        100 + (25 * aiAdoption / 100),  // Patient throughput
+        100 + (18 * aiAdoption / 100),  // Quality improvement
+        100 + (15 * aiAdoption / 100)   // Cost reduction
+    ];
+    productivityChart.update();
+}
+
+function updateComparisonTable(baselineCosts, adminSavings, errorSavings, clinicalSavings, aiImpact) {
+    const tableData = [
+        {
+            metric: 'Administrative Costs',
+            baseline: '¥0.70T',
+            withAI: `¥${(baselineCosts.administrative - adminSavings).toFixed(2)}T`,
+            improvement: `-${(adminSavings/baselineCosts.administrative*100).toFixed(1)}%`,
+            annualImpact: `¥${(adminSavings*1000).toFixed(0)}B`
+        },
+        {
+            metric: 'Error-Related Costs',
+            baseline: '¥2.10T',
+            withAI: `¥${(baselineCosts.errors - errorSavings).toFixed(2)}T`,
+            improvement: `-${(errorSavings/baselineCosts.errors*100).toFixed(1)}%`,
+            annualImpact: `¥${(errorSavings*1000).toFixed(0)}B`
+        },
+        {
+            metric: 'Clinical Operation Costs',
+            baseline: '¥35.20T',
+            withAI: `¥${(baselineCosts.clinical - clinicalSavings).toFixed(2)}T`,
+            improvement: `-${(clinicalSavings/baselineCosts.clinical*100).toFixed(1)}%`,
+            annualImpact: `¥${(clinicalSavings*1000).toFixed(0)}B`
+        },
+        {
+            metric: 'Processing Time',
+            baseline: '4.0 hours',
+            withAI: `${(4.0 * (1 - 0.75 * aiImpact)).toFixed(1)} hours`,
+            improvement: `-${(75 * aiImpact).toFixed(0)}%`,
+            annualImpact: 'Efficiency gain'
+        },
+        {
+            metric: 'Error Rate',
+            baseline: '2.5%',
+            withAI: `${(2.5 * (1 - 0.75 * aiImpact)).toFixed(1)}%`,
+            improvement: `-${(75 * aiImpact).toFixed(0)}%`,
+            annualImpact: 'Quality improvement'
+        },
+        {
+            metric: 'Patient Throughput',
+            baseline: '20 patients/worker/day',
+            withAI: `${(20 * (1 + 0.22 * aiImpact)).toFixed(1)} patients/worker/day`,
+            improvement: `+${(22 * aiImpact).toFixed(0)}%`,
+            annualImpact: 'Capacity increase'
+        }
+    ];
+
+    const tbody = document.getElementById('comparison-table-body');
+    tbody.innerHTML = '';
+    
+    tableData.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><strong>${row.metric}</strong></td>
+            <td>${row.baseline}</td>
+            <td>${row.withAI}</td>
+            <td class="${row.improvement.includes('-') ? 'positive' : 'positive'}">${row.improvement}</td>
+            <td><strong>${row.annualImpact}</strong></td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+// Add interactive features
+document.querySelectorAll('.metric-card').forEach(card => {
+    card.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-5px) scale(1.02)';
+    });
+    
+    card.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0) scale(1)';
+    });
+});
+
+// Export functionality
+function exportData() {
+    const data = {
+        parameters: {
+            aiAdoption: document.getElementById('ai-adoption').value,
+            adminEfficiency: document.getElementById('admin-efficiency').value,
+            errorReduction: document.getElementById('error-reduction').value,
+            implementationCost: document.getElementById('implementation-cost').value
+        },
+        results: {
+            annualSavings: document.getElementById('annual-savings').textContent,
+            roi: document.getElementById('roi-value').textContent,
+            adminReduction: document.getElementById('admin-reduction').textContent,
+            patientIncrease: document.getElementById('patient-increase').textContent
+        },
+        timestamp: new Date().toISOString()
+    };
+    
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'medical-ai-analysis.json';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+// Add export button after page loads
+window.addEventListener('load', function() {
+    const exportBtn = document.createElement('button');
+    exportBtn.textContent = '📊 Export Analysis';
+    exportBtn.className = 'update-button';
+    exportBtn.style.marginLeft = '10px';
+    exportBtn.onclick = exportData;
+    document.querySelector('.update-button').parentNode.appendChild(exportBtn);
+});
