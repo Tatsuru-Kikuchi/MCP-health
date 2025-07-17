@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Impact on Japan Medical Costs - Interactive Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.6.1/d3.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="header">
+        <div class="container">
+            <div class="header-content">
+                <h1>🏥 AI Impact on Japan Medical Costs</h1>
+                <p>Interactive Analysis of Generative AI's Economic Impact on Healthcare Efficiency</p>
+                <a href="https://github.com/Tatsuru-Kikuchi/MCP-health" class="github-link" target="_blank">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                    View on GitHub
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Key Metrics Overview -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-value positive" id="annual-savings">¥3.2T</div>
+                <div class="metric-label">Annual Savings Potential</div>
+                <div class="metric-change positive" id="savings-change">+47% vs baseline</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value positive" id="roi-value">245%</div>
+                <div class="metric-label">5-Year ROI</div>
+                <div class="metric-change positive" id="roi-change">Payback: 2.1 years</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value negative" id="admin-reduction">-52%</div>
+                <div class="metric-label">Administrative Time</div>
+                <div class="metric-change positive" id="admin-change">Efficiency gain</div>
+            </div>
+            <div class="metric-card">
+                <div class="metric-value positive" id="patient-increase">+24%</div>
+                <div class="metric-label">Patient Throughput</div>
+                <div class="metric-change positive" id="throughput-change">Capacity improvement</div>
+            </div>
+        </div>
+
+        <!-- Interactive Controls -->
+        <div class="controls">
+            <h3>📊 Adjust Analysis Parameters</h3>
+            <div class="control-group">
+                <div class="control-item">
+                    <label for="ai-adoption">AI Adoption Rate (%)</label>
+                    <input type="range" id="ai-adoption" min="20" max="100" value="75" step="5">
+                    <span class="value-display" id="ai-adoption-value">75%</span>
+                </div>
+                <div class="control-item">
+                    <label for="admin-efficiency">Administrative Efficiency Gain (%)</label>
+                    <input type="range" id="admin-efficiency" min="20" max="80" value="50" step="5">
+                    <span class="value-display" id="admin-efficiency-value">50%</span>
+                </div>
+                <div class="control-item">
+                    <label for="error-reduction">Error Rate Reduction (%)</label>
+                    <input type="range" id="error-reduction" min="30" max="90" value="75" step="5">
+                    <span class="value-display" id="error-reduction-value">75%</span>
+                </div>
+                <div class="control-item">
+                    <label for="implementation-cost">Implementation Cost (Billion ¥)</label>
+                    <input type="range" id="implementation-cost" min="1" max="5" value="2" step="0.1">
+                    <span class="value-display" id="implementation-cost-value">¥2.0B</span>
+                </div>
+            </div>
+            <button class="update-button" onclick="updateAnalysis()">🔄 Update Analysis</button>
+        </div>
+
+        <!-- Dashboard Charts -->
+        <div class="dashboard">
+            <div class="card">
+                <h3>💰 Cost Comparison: With vs Without AI</h3>
+                <div class="chart-container">
+                    <canvas id="costComparisonChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>📈 ROI and Payback Analysis</h3>
+                <div class="chart-container">
+                    <canvas id="roiChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>⏱️ Productivity Improvements</h3>
+                <div class="chart-container">
+                    <canvas id="productivityChart"></canvas>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>🎯 Implementation Timeline</h3>
+                <div class="chart-container">
+                    <canvas id="timelineChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Comparison Table -->
+        <div class="comparison-section">
+            <h3>🔍 Detailed Economic Impact Comparison</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Without AI (Baseline)</th>
+                        <th>With AI Implementation</th>
+                        <th>Improvement</th>
+                        <th>Annual Impact (¥)</th>
+                    </tr>
+                </thead>
+                <tbody id="comparison-table-body">
+                    <!-- Populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Methodology -->
+        <div class="methodology">
+            <h3>🔬 Analysis Methodology</h3>
+            <ul>
+                <li><strong>Data Sources:</strong> Ministry of Health, Labour and Welfare (MHLW), National Database of Health Insurance Claims, Academic research</li>
+                <li><strong>Baseline Metrics:</strong> Japan's current administrative costs (1.6% of healthcare expenditure), error rates, processing times</li>
+                <li><strong>AI Impact Modeling:</strong> Evidence-based improvements from international AI implementations and pilot studies</li>
+                <li><strong>Economic Analysis:</strong> ROI calculations using NPV, payback period, and sensitivity analysis</li>
+                <li><strong>Population Context:</strong> 29.1% of Japan's population is 65+, creating unique healthcare demands</li>
+                <li><strong>Validation:</strong> Cross-referenced with international healthcare systems and AI implementation studies</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="container">
+            <p>© 2024 MCP-health AI Analysis | Data-driven insights for Japan's healthcare transformation</p>
+            <p>Based on official statistics and peer-reviewed research | <a href="https://github.com/Tatsuru-Kikuchi/MCP-health" style="color: #667eea;">View Source Code</a></p>
+        </div>
+    </div>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>
